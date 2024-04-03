@@ -7,11 +7,28 @@ public class DatabaseConnection {
 
     private static final String DB_DRIVER = "oracle.jdbc.OracleDriver";
     private static final String DB_URL = "jdbc:oracle:thin:@localhost:1521:xe";
-    private static final String DB_USER = "c##ana29";
+    private static final String DB_USER = "java";
     private static final String DB_PASS = "password";
 
     public static Connection connection;
     private static DatabaseConnection instance;
+
+    public void testConnection() {
+        String sql = """
+                Select * from test
+                """;
+
+        try {
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+
+            while(rs.next()) {
+                System.out.println(rs.getString("nume"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private DatabaseConnection() {
         try {
