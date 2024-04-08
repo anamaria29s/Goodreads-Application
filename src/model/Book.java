@@ -17,7 +17,7 @@ public class Book {
     public int getIdBook() {
         return idBook;
     }
-    public String getTitlu(String titlu){
+    public String getTitlu(){
         return titlu;
     }
     public void setTitlu(String titlu){
@@ -25,6 +25,10 @@ public class Book {
     }
     public void addAuthor(Author author) {
         authorlist.add(author);
+    }
+
+    public List<Author> getAuthorlist() {
+        return authorlist;
     }
 
     public void removeAuthor(Author author) {

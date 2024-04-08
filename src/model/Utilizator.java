@@ -16,22 +16,22 @@ public class Utilizator {
         this.password = password;
     }
 
-    public int getId(int user_id){
+    public int getId(){
         return user_id;
     }
-    public String getUsername(String username){
+    public String getUsername(){
         return username;
     }
     public void setUsername(String username){
         this.username = username;
     }
-    public String getMail(String mail){
+    public String getMail(){
         return mail;
     }
     public void setMail(String mail){
         this.mail = mail;
     }
-    public String getPassword(String password){
+    public String getPassword(){
         return password;
     }
     public void setPassword(String password){

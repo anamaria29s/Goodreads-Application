@@ -20,13 +20,13 @@ public class Author {
         this.idAuthor = idAuthor;
     }
 
-    public String getNume(String nume){
+    public String getNume(){
         return nume;
     }
     public void setNume(String nume){
         this.nume = nume;
     }
-    public String getPrenume(String prenume){
+    public String getPrenume(){
         return prenume;
     }
     public void setPrenume(String prenume){
