@@ -18,26 +18,50 @@ create table BOOK (
                         title varchar2(255) constraint title_null not null
 );
 
-CREATE TABLE BOOKAUTHOR (
-                             book_id NUMBER(6),
-                             author_id NUMBER(6),
-                             CONSTRAINT fk_book FOREIGN KEY (book_id) REFERENCES BOOK(idBook),
-                             CONSTRAINT fk_author FOREIGN KEY (author_id) REFERENCES AUTHOR(idAuthor),
-                             CONSTRAINT pk_book_author PRIMARY KEY (book_id, author_id)
+create table BOOKAUTHOR (
+                             book_id number(6),
+                             author_id number(6),
+                             constraint fk_book foreign key (book_id) references BOOK(idBook),
+                             constraint fk_author foreign key (author_id) references AUTHOR(idAuthor),
+                             constraint pk_book_author primary key (book_id, author_id)
 );
 
 
-CREATE TABLE SHELF (
+create table SHELF (
                             idShelf  number(6) constraint pk_shelfid primary key,
                             status  varchar2(255) constraint status_null not null,
                             user_id number(6),
                             constraint fk_userid foreign key (user_id) references utilizator(user_id)
 );
 
-CREATE TABLE SHELFBOOK (
-                            book_id NUMBER(6),
-                            shelf_id NUMBER(6),
-                            CONSTRAINT fk_book2 FOREIGN KEY (book_id) REFERENCES BOOK(idBook),
-                            CONSTRAINT fk_shelf2 FOREIGN KEY (shelf_id) REFERENCES SHELF(idShelf),
-                            CONSTRAINT pk_book_shelf PRIMARY KEY (book_id, shelf_id)
+create table SHELFBOOK (
+                            book_id number(6),
+                            shelf_id number(6),
+                            constraint fk_book2 foreign key (book_id) references BOOK(idBook),
+                            constraint fk_shelf2 foreign key (shelf_id) references SHELF(idShelf),
+                            constraint pk_book_shelf primary key (book_id, shelf_id)
+);
+
+create table RATING (
+                       idRating  number(6) constraint pk_ratingid primary key,
+                       nota number(6) constraint nota_null not null,
+                       review  varchar2(255) constraint review_null not null,
+                       user_id number(6),
+                       constraint fk_userid2 foreign key (user_id) references utilizator(user_id)
+);
+
+create table AUTHORRATING (
+                              author_id number(6),
+                              rating_id number(6),
+                              constraint fk_author3 foreign key (author_id) references AUTHOR(idAuthor),
+                              constraint fk_rating2 foreign key (rating_id) references RATING(idRating),
+                              constraint pk_author_rating primary key (author_id, rating_id)
+);
+
+create table BOOKRATING (
+                              book_id number(6),
+                              rating_id number(6),
+                              constraint fk_book3 foreign key (book_id) references BOOK(idBook),
+                              constraint fk_rating3 foreign key (rating_id) references RATING(idRating),
+                              constraint pk_book_rating primary key (book_id, rating_id)
 );

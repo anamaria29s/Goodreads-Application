@@ -1,6 +1,10 @@
-package model;
+package model.associative;
 
-public class BookRating extends Rating{
+import model.Book;
+import model.Rating;
+import model.Utilizator;
+
+public class BookRating extends Rating {
     private Book book;
 
     public BookRating(int idRating, int nota, String review, Utilizator user, Book book) {
@@ -14,5 +18,9 @@ public class BookRating extends Rating{
 
     public void setBook(Book book) {
         this.book = book;
+    }
+
+    public int getIdBook() {
+        return book.getIdBook();
     }
 }
