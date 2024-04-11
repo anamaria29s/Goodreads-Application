@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+
 public class UtilizatorRepository implements GenericRepository<Utilizator> {
     private static DatabaseConnection db = null;
 

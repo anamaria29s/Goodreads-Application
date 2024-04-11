@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Scanner;
+
 public class Author {
     private int idAuthor;
     private String nume;
@@ -33,4 +35,14 @@ public class Author {
         this.prenume = prenume;
     }
 
+    public void read() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the author's ID: ");
+        this.idAuthor = scanner.nextInt();
+        scanner.nextLine();
+        System.out.println("Enter the author's last name: ");
+        this.nume = scanner.nextLine();
+        System.out.println("Enter the author's first name: ");
+        this.prenume = scanner.nextLine();
+    }
 }

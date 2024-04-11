@@ -1,6 +1,8 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Book {
     private int idBook;
@@ -33,5 +35,22 @@ public class Book {
 
     public void removeAuthor(Author author) {
         authorlist.remove(author);
+    }
+
+    public void read() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the book's ID: ");
+        this.idBook = scanner.nextInt();
+        System.out.println("Enter the book's title: ");
+        this.titlu = scanner.nextLine();
+        System.out.println("How many authors does the book have? ");
+        int numAuthors = scanner.nextInt();
+        scanner.nextLine();
+        authorlist = new ArrayList<>();
+        for (int i = 0; i < numAuthors; i++) {
+            Author author = new Author();
+            author.read();
+            authorlist.add(author);
+        }
     }
 }

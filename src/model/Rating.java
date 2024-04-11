@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Scanner;
+
 public class Rating {
     private int idRating;
     private int nota;
@@ -40,5 +42,15 @@ public class Rating {
 
     public void setReview(String review) {
         this.review = review;
+    }
+    public void read() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the ratng's ID: ");
+        this.idRating = scanner.nextInt();
+        System.out.println("Enter the rating: ");
+        this.nota = scanner.nextInt();
+        scanner.nextLine();
+        System.out.println("Enter the review: ");
+        this.review = scanner.nextLine();
     }
 }

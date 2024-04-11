@@ -1,5 +1,5 @@
 package model;
-
+import java.util.Scanner;
 public class Utilizator {
 
     private int user_id;
@@ -36,5 +36,18 @@ public class Utilizator {
     }
     public void setPassword(String password){
         this.password = password;
+    }
+
+    public void read() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter user ID:");
+        user_id = scanner.nextInt();
+        scanner.nextLine();
+        System.out.println("Enter username:");
+        username = scanner.nextLine();
+        System.out.println("Enter email:");
+        mail = scanner.nextLine();
+        System.out.println("Enter password:");
+        password = scanner.nextLine();
     }
 }
