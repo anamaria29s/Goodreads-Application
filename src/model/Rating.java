@@ -45,7 +45,7 @@ public class Rating {
     }
     public void read() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter the ratng's ID: ");
+        System.out.println("Enter the rating's ID: ");
         this.idRating = scanner.nextInt();
         System.out.println("Enter the rating: ");
         this.nota = scanner.nextInt();

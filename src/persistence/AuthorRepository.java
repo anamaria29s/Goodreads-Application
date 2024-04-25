@@ -88,4 +88,33 @@ public class AuthorRepository implements GenericRepository<Author> {
             e.printStackTrace();
         }
     }
+
+    public ArrayList<Author> getAuthorsForBook(int book_id) {
+        String sql = """
+                 SELECT a.idAuthor, a.nume, a.prenume
+                 FROM author a
+                 JOIN bookauthor ba ON a.idAuthor = ba.AUTHOR_ID
+                 WHERE ba.BOOK_ID = ?
+                 """;
+
+        ArrayList<Author> authors = new ArrayList<>();
+        try {
+            PreparedStatement stmt = db.connection.prepareStatement(sql);
+            stmt.setInt(1, book_id);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Author author = new Author(
+                        rs.getInt("idAuthor"),
+                        rs.getString("nume"),
+                        rs.getString("prenume")
+                );
+                authors.add(author);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return authors;
+    }
+
 }

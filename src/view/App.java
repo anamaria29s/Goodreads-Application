@@ -21,7 +21,7 @@ public class App {
         db = DatabaseConnection.getInstance();
         utilizatorRepository = new UtilizatorRepository(db);
         authorRepository = new AuthorRepository(db);
-        bookRepository = new BookRepository(db);
+        bookRepository = new BookRepository(db, authorRepository);
         ratingRepository = new RatingRepository(db);
         shelfRepository = new ShelfRepository(db, utilizatorRepository);
         shelfBookRepository = new ShelfBookRepository(db);

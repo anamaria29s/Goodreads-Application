@@ -40,9 +40,10 @@ public class Book {
     public void read() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the book's ID: ");
-        this.idBook = scanner.nextInt();
+        idBook = scanner.nextInt();
+        scanner.nextLine();
         System.out.println("Enter the book's title: ");
-        this.titlu = scanner.nextLine();
+        titlu = scanner.nextLine();
         System.out.println("How many authors does the book have? ");
         int numAuthors = scanner.nextInt();
         scanner.nextLine();

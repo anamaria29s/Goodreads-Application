@@ -14,9 +14,11 @@ import java.util.Scanner;
 
 public class BookRepository implements GenericRepository<Book> {
     private final DatabaseConnection db;
+    private final AuthorRepository authorRepository;
 
-    public BookRepository(DatabaseConnection db) {
+    public BookRepository(DatabaseConnection db, AuthorRepository authorRepository) {
         this.db = db;
+        this.authorRepository = authorRepository;
     }
 
     @Override
@@ -44,10 +46,10 @@ public class BookRepository implements GenericRepository<Book> {
     @Override
     public Book get(int id) {
         String sql = """
-                     SELECT idBook, title
-                     FROM book
-                     WHERE idBook = ?
-                     """;
+                 SELECT idBook, title
+                 FROM book
+                 WHERE idBook = ?
+                 """;
 
         try {
             PreparedStatement stmt = db.connection.prepareStatement(sql);
@@ -57,8 +59,8 @@ public class BookRepository implements GenericRepository<Book> {
             if (rs.next()) {
                 return new Book(
                         rs.getInt("idBook"),
-                        rs.getString("titlu"),
-                        new ArrayList<>() // Temporar returnăm o listă goală de autori
+                        rs.getString("title"),
+                        getAuthorsForBook(id)
                 );
             }
         } catch (SQLException e) {
@@ -72,9 +74,9 @@ public class BookRepository implements GenericRepository<Book> {
     public ArrayList<Book> getAll() {
         ArrayList<Book> books = new ArrayList<>();
         String sql = """
-                     SELECT idBook, title
-                     FROM book
-                     """;
+                 SELECT idBook, title
+                 FROM book
+                 """;
 
         try {
             PreparedStatement stmt = db.connection.prepareStatement(sql);
@@ -82,9 +84,9 @@ public class BookRepository implements GenericRepository<Book> {
 
             while (rs.next()) {
                 int idBook = rs.getInt("idBook");
-                String titlu = rs.getString("titlu");
+                String title = rs.getString("title");
                 List<Author> authors = getAuthorsForBook(idBook);
-                books.add(new Book(idBook, titlu, authors));
+                books.add(new Book(idBook, title, authors));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -92,6 +94,7 @@ public class BookRepository implements GenericRepository<Book> {
 
         return books;
     }
+
 
     @Override
     public void update(Book entity) {
@@ -140,14 +143,14 @@ public class BookRepository implements GenericRepository<Book> {
     }
 
     // Metoda pentru a obține lista de autori pentru o anumita carte
-    private List<Author> getAuthorsForBook(int idBook) {
+    public List<Author> getAuthorsForBook(int idBook) {
         List<Author> authors = new ArrayList<>();
         String sql = """
-                 SELECT a.idAuthor, a.nume, a.prenume
-                 FROM author a
-                 JOIN bookauthor ba ON a.idAuthor = ba.AUTHOR_ID
-                 WHERE ba.BOOK_ID = ?
-                 """;
+             SELECT a.idAuthor, a.nume, a.prenume
+             FROM author a, bookauthor ba
+             WHERE a.idAuthor = ba.AUTHOR_ID
+             AND ba.BOOK_ID = ?
+             """;
 
         try {
             PreparedStatement stmt = db.connection.prepareStatement(sql);
@@ -168,6 +171,7 @@ public class BookRepository implements GenericRepository<Book> {
 
         return authors;
     }
+
 
 
 

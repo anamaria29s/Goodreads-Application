@@ -12,11 +12,13 @@ create table AUTHOR (
                             nume varchar2(255) constraint nume_null not null ,
                             prenume varchar2(255) constraint prenume_null not null
 );
+select * from AUTHOR;
 
 create table BOOK (
                         idBook number(6) constraint pk_bookid primary key ,
                         title varchar2(255) constraint title_null not null
 );
+select * from BOOK;
 
 create table BOOKAUTHOR (
                              book_id number(6),
@@ -26,6 +28,7 @@ create table BOOKAUTHOR (
                              constraint pk_book_author primary key (book_id, author_id)
 );
 
+select * from BOOKAUTHOR;
 
 create table SHELF (
                             idShelf  number(6) constraint pk_shelfid primary key,
