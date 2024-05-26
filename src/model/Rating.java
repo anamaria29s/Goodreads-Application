@@ -27,6 +27,9 @@ public class Rating {
     public Utilizator getUser() {
         return user;
     }
+    public void setUser(Utilizator user) {
+        this.user = user;
+    }
 
     public int getNota() {
         return nota;

@@ -19,6 +19,11 @@ public class Book {
     public int getIdBook() {
         return idBook;
     }
+
+    public void setIdBook(int idBook) {
+        this.idBook = idBook;
+    }
+
     public String getTitlu(){
         return titlu;
     }

@@ -173,6 +173,31 @@ public class BookRepository implements GenericRepository<Book> {
     }
 
 
+    public List<Book> getBooksByAuthor(int authorId) {
+        List<Book> books = new ArrayList<>();
+        String sql = """
+                SELECT b.idBook, b.title
+                FROM book b
+                JOIN bookauthor ba ON b.idBook = ba.BOOK_ID
+                WHERE ba.AUTHOR_ID = ?
+                ORDER BY b.title ASC
+                """;
+
+        try {
+            PreparedStatement stmt = db.connection.prepareStatement(sql);
+            stmt.setInt(1, authorId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Book book = new Book(rs.getInt("idBook"), rs.getString("title"), getAuthorsForBook(rs.getInt("idBook")));
+                books.add(book);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return books;
+    }
 
 
 }

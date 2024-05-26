@@ -32,7 +32,6 @@ select * from BOOKAUTHOR;
 
 create table SHELF (
                             idShelf  number(6) constraint pk_shelfid primary key,
-                            status  varchar2(255) constraint status_null not null,
                             user_id number(6),
                             constraint fk_userid foreign key (user_id) references utilizator(user_id)
 );
@@ -40,11 +39,14 @@ create table SHELF (
 create table SHELFBOOK (
                             book_id number(6),
                             shelf_id number(6),
+                            status  varchar2(255) constraint status_null not null,
                             constraint fk_book2 foreign key (book_id) references BOOK(idBook),
                             constraint fk_shelf2 foreign key (shelf_id) references SHELF(idShelf),
                             constraint pk_book_shelf primary key (book_id, shelf_id)
 );
 
+drop table SHELF;
+drop table SHELFBOOK;
 create table RATING (
                        idRating  number(6) constraint pk_ratingid primary key,
                        nota number(6) constraint nota_null not null,

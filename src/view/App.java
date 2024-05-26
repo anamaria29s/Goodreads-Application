@@ -1,8 +1,12 @@
 package view;
 
 import model.*;
+import model.associative.ShelfBook;
 import persistence.*;
 import service.DatabaseConnection;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class App {
@@ -50,7 +54,8 @@ public class App {
                 case 2 -> read();
                 case 3 -> update();
                 case 4 -> delete();
-                case 5 -> {
+                case 5 -> login();
+                case 6 -> {
                     System.out.println("Exiting the application...");
                     return;
                 }
@@ -339,15 +344,138 @@ public class App {
             }
         }
     }
+    private void login(){
+        Scanner sc = new Scanner(System.in);
+       System.out.print("Enter your user ID to login: ");
+       int userId = sc.nextInt();
+        sc.nextLine();
+
+        Utilizator user = utilizatorRepository.get(userId);
+        if (user == null) {
+            System.out.println("User not found. Exiting login.");
+            return;
+        }
+
+        int option;
+        while (true) {
+            printLoginMenu();
+            System.out.print("Choose option: ");
+            option = sc.nextInt();
+            sc.nextLine();
+
+            switch (option) {
+                case 1 -> viewBooksByAuthor();
+                case 2 -> viewBookById();
+                case 3 -> viewRatingById();
+                case 4 -> manageShelf(user);
+                case 5 -> {
+                    System.out.println("Logging out...");
+                    return;
+                }
+                default -> System.out.println("Invalid option, please choose something else.");
+            }
+        }
+    }
+
+    private void viewBooksByAuthor() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter the ID of the author: ");
+        int authorId = sc.nextInt();
+        sc.nextLine();
+
+        List<Book> books = bookRepository.getBooksByAuthor(authorId);
+        if (books.isEmpty()) {
+            System.out.println("No books found for author ID: " + authorId);
+        } else {
+            books.forEach(book -> System.out.println("ID: " + book.getIdBook() + ", Title: " + book.getTitlu()));
+        }
+    }
+
+    private void viewBookById() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the ID of the book: ");
+        int bookId = scanner.nextInt();
+        scanner.nextLine();
+        Book book = bookRepository.get(bookId);
+        if (book != null) {
+            System.out.println("Book found:");
+            System.out.println("ID: " + book.getIdBook());
+            System.out.println("Title: " + book.getTitlu());
+            // Print other book details as needed
+        } else {
+            System.out.println("Book not found with ID: " + bookId);
+        }
+    }
+
+    private void viewRatingById() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter the ID of the rating: ");
+        int ratingId = sc.nextInt();
+        sc.nextLine();
+
+        Rating rating = ratingRepository.get(ratingId);
+        if (rating != null) {
+            System.out.println("Rating found:");
+            System.out.println("ID: " + rating.getIdRating());
+            System.out.println("Note: " + rating.getNota());
+            System.out.println("Review: " + rating.getReview());
+        } else {
+            System.out.println("Rating not found with ID: " + ratingId);
+        }
+    }
+
+    private void manageShelf(Utilizator user) {
+        Scanner sc = new Scanner(System.in);
+        int choice;
+
+        while (true) {
+            printShelfMenu();
+            System.out.print("Choose option: ");
+            choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+                case 1 -> {
+//                    ArrayList<Book> books = shelfBookRepository.getAll();
+//                    for (Book book : books) {
+//                        System.out.println("Book: " + book.getTitlu() + " with status: " + ShelfBook.getStatus().value());
+//                    }
+                }
+                case 2 -> {
+                    System.out.print("Enter the ID of the book to add to shelf: ");
+                    int bookId = sc.nextInt();
+                    sc.nextLine();
+                    Status status = Status.READING;
+
+                    ShelfBook shelfBook = new ShelfBook(bookId, bookId, status); // Assuming shelf ID is 1
+                    shelfBookRepository.add(shelfBook);
+                    System.out.println("Book added to the user's shelf with status " + status);
+                }
+                case 3 -> {
+                    System.out.print("Enter the ID of the book to remove from shelf: ");
+                    int bookId = sc.nextInt();
+                    sc.nextLine();
+                    ShelfBook shelfBook = new ShelfBook(bookId, user.getId(), null);
+                    shelfBookRepository.delete(shelfBook);
+                    System.out.println("Book removed from the user's shelf.");
+                }
+                case 4 -> {
+                    return;
+                }
+                default -> System.out.println("Invalid option, please choose something else.");
+            }
+        }
+    }
 
 
     private void printCRUDMenu() {
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~ GOODREADS MENU ~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~ GOODREADS MENU (CRUD) ~~~~~~~~~~~~~~~~~~~~~~~");
         System.out.println("1 - Create menu");
         System.out.println("2 - Read menu");
         System.out.println("3 - Update menu");
         System.out.println("4 - Delete menu");
-        System.out.println("5 - Exit the application");
+        System.out.println("5 - Login");
+        System.out.println("6 - Exit the application");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     }
 
@@ -358,6 +486,24 @@ public class App {
         System.out.println("3 - Book");
         System.out.println("4 - Rating");
         System.out.println("5 - Go back");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    }
+    private void printLoginMenu() {
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~ GOODREADS MENU (LOGIN) ~~~~~~~~~~~~~~~~~~~");
+       // System.out.println("1 - User");
+        System.out.println("1 - Author");
+        System.out.println("2 - Book");
+        System.out.println("3 - Rating");
+        System.out.println("4 - Shelf");
+        System.out.println("5 - Go back");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    }
+    private void printShelfMenu() {
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~ GOODREADS MENU (Shelf) ~~~~~~~~~~~~~~~~~~~");
+        System.out.println("1 - View shelf");
+        System.out.println("2 - Add book to shelf");
+        System.out.println("3 - Delete book from shelf");
+        System.out.println("4 - Go back");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     }
 }
