@@ -1,6 +1,8 @@
 package view;
 
 import model.*;
+import model.associative.AuthorRating;
+import model.associative.BookRating;
 import model.associative.ShelfBook;
 import persistence.*;
 import service.DatabaseConnection;
@@ -29,8 +31,8 @@ public class App {
         ratingRepository = new RatingRepository(db);
         shelfRepository = new ShelfRepository(db, utilizatorRepository);
         shelfBookRepository = new ShelfBookRepository(db);
-        bookRatingRepository = new BookRatingRepository(db);
-        authorRatingRepository = new AuthorRatingRepository(db);
+        bookRatingRepository = new BookRatingRepository(db, bookRepository, ratingRepository);
+        authorRatingRepository = new AuthorRatingRepository(db, authorRepository, ratingRepository);
     }
 
     public static App getInstance() {
@@ -132,7 +134,6 @@ public class App {
                         System.out.println("ID: " + user.getId());
                         System.out.println("Username: " + user.getUsername());
                         System.out.println("Mail: " + user.getMail());
-                        // Print other user details as needed
                     } else {
                         System.out.println("User not found with ID: " + userId);
                     }
@@ -386,7 +387,7 @@ public class App {
             switch (option) {
                 case 1 -> viewBooksByAuthor();
                 case 2 -> viewBookById();
-                case 3 -> viewRatingById();
+                case 3 -> manageRating(user);
                 case 4 -> manageShelf(user);
                 case 5 -> {
                     System.out.println("Logging out...");
@@ -518,6 +519,93 @@ public class App {
                     System.out.println("Book status updated successfully.");
 
                 }
+                case 5-> {
+                    return;
+                }
+                default -> System.out.println("Invalid option, please choose something else.");
+            }
+        }
+    }
+
+    private void manageRating(Utilizator user) {
+        Scanner scanner = new Scanner(System.in);
+        int choice;
+
+        while (true) {
+            printRatingMenu();
+            System.out.print("Choose option: ");
+            choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1 -> {
+                    // Adăugare rating pentru un autor
+                    System.out.print("Enter the ID of the rating: ");
+                    int ratingId = scanner.nextInt();
+                    scanner.nextLine();
+                    System.out.print("Enter the ID of the author to leave a rating: ");
+                    int authorId = scanner.nextInt();
+                    scanner.nextLine();
+                    System.out.print("Enter the rating for the author: ");
+                    int nota = scanner.nextInt();
+                    scanner.nextLine();
+                    System.out.print("Enter the review for the author: ");
+                    String review = scanner.nextLine();
+                    Rating authorRating = new Rating(ratingId, nota, review, user);
+                    ratingRepository.add(authorRating);
+                    AuthorRating authorRatingAssociation = new AuthorRating(ratingId, nota, review, user, authorRepository.get(authorId));
+                    authorRatingRepository.add(authorRatingAssociation);
+                    System.out.println("Rating added successfully for the author.");
+                }
+                case 2 -> {
+                    // Adăugare rating pentru o carte
+                    System.out.print("Enter the ID of the rating: ");
+                    int ratingId = scanner.nextInt();
+                    scanner.nextLine();
+                    System.out.print("Enter the ID of the book to leave a rating: ");
+                    int bookId = scanner.nextInt();
+                    scanner.nextLine();
+                    System.out.print("Enter the rating for the book: ");
+                    int nota = scanner.nextInt();
+                    scanner.nextLine();
+                    System.out.print("Enter the review for the book: ");
+                    String review = scanner.nextLine();
+                    Rating bookRating = new Rating(ratingId, nota, review, user);
+                    ratingRepository.add(bookRating);
+                    BookRating bookRatingAssociation = new BookRating(ratingId, nota, review, user, bookRepository.get(bookId));
+                    bookRatingRepository.add(bookRatingAssociation);
+                    System.out.println("Rating added successfully for the book.");
+                }
+                case 3 -> {
+                    // Vezi toate rating-urile pentru un autor
+                    System.out.print("Enter the ID of the author to see all ratings: ");
+                    int authorId = scanner.nextInt();
+                    scanner.nextLine();
+                    ArrayList<Rating> authorRatings = authorRatingRepository.getAllRatingsForAuthor(authorId);
+                    if (!authorRatings.isEmpty()) {
+                        System.out.println("All ratings for the author with ID " + authorId + ":");
+                        for (Rating authorRating : authorRatings) {
+                            System.out.println("Rating: " + authorRating.getNota() + ", Review: " + authorRating.getReview());
+                        }
+                    } else {
+                        System.out.println("No ratings found for the author with ID " + authorId);
+                    }
+                }
+                case 4 -> {
+                    // Vezi toate rating-urile pentru o carte
+                    System.out.print("Enter the ID of the book to see all ratings: ");
+                    int bookId = scanner.nextInt();
+                    scanner.nextLine();
+                    ArrayList<Rating> bookRatings = bookRatingRepository.getAllRatingsForBook(bookId);
+                    if (!bookRatings.isEmpty()) {
+                        System.out.println("All ratings for the book with ID " + bookId + ":");
+                        for (Rating bookRating : bookRatings) {
+                            System.out.println("Rating: " + bookRating.getNota() + ", Review: " + bookRating.getReview());
+                        }
+                    } else {
+                        System.out.println("No ratings found for the book with ID " + bookId);
+                    }
+                }
                 case 5 -> {
                     return;
                 }
@@ -558,11 +646,23 @@ public class App {
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     }
     private void printShelfMenu() {
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~ GOODREADS MENU (Shelf) ~~~~~~~~~~~~~~~~~~~");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~ GOODREADS MENU (shelf) ~~~~~~~~~~~~~~~~~~~");
         System.out.println("1 - View shelf");
         System.out.println("2 - Add book to shelf");
         System.out.println("3 - Delete book from shelf");
         System.out.println("4 - Update shelf");
+        System.out.println("5 - Leave a rating for an author");
+        System.out.println("6 - Leave a rating for a book");
+        System.out.println("7 - Go back");
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    }
+
+    private void printRatingMenu() {
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~ GOODREADS MENU (rating) ~~~~~~~~~~~~~~~~~~~");
+        System.out.println("1 - Leave a rating for an author");
+        System.out.println("2 - Leave a rating for a book");
+        System.out.println("3 - See all ratings for an author");
+        System.out.println("4 - See all ratings for a book");
         System.out.println("5 - Go back");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     }
