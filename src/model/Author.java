@@ -45,4 +45,10 @@ public class Author {
         System.out.println("Enter the author's first name: ");
         this.prenume = scanner.nextLine();
     }
+
+    public void read2() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the author's ID: ");
+        this.idAuthor = scanner.nextInt();
+    }
 }

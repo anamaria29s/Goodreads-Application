@@ -126,4 +126,25 @@ public class UtilizatorRepository implements GenericRepository<Utilizator> {
             throw new RuntimeException(e);
         }
     }
+    public Utilizator getByUsername(String username) {
+        String sql = "SELECT * FROM utilizator WHERE username = ?";
+        try {
+            PreparedStatement stmt = db.connection.prepareStatement(sql);
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return new Utilizator(
+                        rs.getInt("user_id"),
+                        rs.getString("username"),
+                        rs.getString("mail"),
+                        rs.getString("password")
+                );
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
 }

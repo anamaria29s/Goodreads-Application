@@ -79,6 +79,15 @@ public class App {
                     Utilizator user = new Utilizator();
                     user.read();
                     utilizatorRepository.add(user);
+                    int userId = user.getId();
+                    System.out.print("Enter the ID of the new shelf: ");
+                    int shelfId = scanner.nextInt();
+                    scanner.nextLine();
+                    Shelf shelf = new Shelf(shelfId, user);
+                    shelfRepository.add(shelf);
+
+                    System.out.println("User and shelf created successfully.");
+
                 }
                 case 2 -> {
                     Author author = new Author();
@@ -154,7 +163,11 @@ public class App {
                         System.out.println("Book found:");
                         System.out.println("ID: " + book.getIdBook());
                         System.out.println("Title: " + book.getTitlu());
-                        // Print other book details as needed
+                        System.out.println("Authors:");
+                        List<Author> authors = bookRepository.getAuthorsForBook(bookId);
+                        for (Author author : authors) {
+                            System.out.println("- " + author.getNume() + " " + author.getPrenume());
+                        }
                     } else {
                         System.out.println("Book not found with ID: " + bookId);
                     }
@@ -346,13 +359,20 @@ public class App {
     }
     private void login(){
         Scanner sc = new Scanner(System.in);
-       System.out.print("Enter your user ID to login: ");
-       int userId = sc.nextInt();
-        sc.nextLine();
+        System.out.print("Enter your username to login: ");
+        String username = sc.nextLine();
+        System.out.print("Enter your password: ");
+        String password = sc.nextLine();
 
-        Utilizator user = utilizatorRepository.get(userId);
+        Utilizator user = utilizatorRepository.getByUsername(username);
+
         if (user == null) {
             System.out.println("User not found. Exiting login.");
+            return;
+        }
+
+        if (!user.getPassword().equals(password)) {
+            System.out.println("Invalid password. Exiting login.");
             return;
         }
 
@@ -427,7 +447,8 @@ public class App {
     private void manageShelf(Utilizator user) {
         Scanner sc = new Scanner(System.in);
         int choice;
-
+        ShelfBookRepository shelfBookRepository = new ShelfBookRepository(db);
+        ShelfRepository shelf = new ShelfRepository(db,  new UtilizatorRepository(db));
         while (true) {
             printShelfMenu();
             System.out.print("Choose option: ");
@@ -436,30 +457,68 @@ public class App {
 
             switch (choice) {
                 case 1 -> {
-//                    ArrayList<Book> books = shelfBookRepository.getAll();
-//                    for (Book book : books) {
-//                        System.out.println("Book: " + book.getTitlu() + " with status: " + ShelfBook.getStatus().value());
-//                    }
+                    Shelf userShelf = shelfRepository.getShelfByUserId(user.getId());
+                    if (userShelf != null) {
+                        ArrayList<ShelfBook> shelfBooks = shelfBookRepository.getBooksInShelf(userShelf.getIdShelf());
+                        ArrayList<Integer> bookIds = new ArrayList<>();
+                        for (ShelfBook shelfBook : shelfBooks) {
+                            bookIds.add(shelfBook.getIdBook());
+                        }
+                        if (!bookIds.isEmpty()) {
+                        ArrayList<String> bookTitles = bookRepository.getBookTitlesByIds(bookIds);
+
+                            for (int i = 0; i < bookTitles.size(); i++) {
+                                String title = bookTitles.get(i);
+                                String status = shelfBooks.get(i).getStatus().value();
+                                System.out.println("Book Title: " + title + " Status: " + status);
+                            }
+                        }
+                        else {
+                            System.out.println("User does not have books in shelf.");
+                        }
+
+                    } else {
+                        System.out.println("User does not have a shelf.");
+                    }
+
+
                 }
                 case 2 -> {
                     System.out.print("Enter the ID of the book to add to shelf: ");
                     int bookId = sc.nextInt();
                     sc.nextLine();
-                    Status status = Status.READING;
 
-                    ShelfBook shelfBook = new ShelfBook(bookId, bookId, status); // Assuming shelf ID is 1
-                    shelfBookRepository.add(shelfBook);
-                    System.out.println("Book added to the user's shelf with status " + status);
+                    System.out.print("Enter the status of the book (read, to read, reading): ");
+                    String statusInput = sc.nextLine();
+                    Status status = Status.fromString(statusInput);
+
+                    int shelfId = shelfRepository.getShelfByUserId(user.getId()).getIdShelf(); // Obține shelfId pentru utilizatorul curent
+                    ShelfBook shelfBook = new ShelfBook(bookId, shelfId, status); // Folosește shelfId
+                    shelfBookRepository.add(shelfBook); // Adaugă ShelfBook în repository
+
+                    System.out.println("Book added to the user's shelf with status " + status.value());
                 }
                 case 3 -> {
                     System.out.print("Enter the ID of the book to remove from shelf: ");
                     int bookId = sc.nextInt();
                     sc.nextLine();
-                    ShelfBook shelfBook = new ShelfBook(bookId, user.getId(), null);
+                    ShelfBook shelfBook =  shelfBookRepository.get(bookId);
                     shelfBookRepository.delete(shelfBook);
                     System.out.println("Book removed from the user's shelf.");
                 }
                 case 4 -> {
+                    System.out.print("Enter the ID of the book to update status: ");
+                    int bookIdToUpdate = sc.nextInt();
+                    sc.nextLine();
+                    System.out.print("Enter the new status (read, to read, reading): ");
+                    String newStatusInput = sc.nextLine();
+                    Status newStatus = Status.fromString(newStatusInput);
+                    int shelfId = shelfRepository.getShelfByUserId(user.getId()).getIdShelf(); // Obține shelfId pentru utilizatorul curent
+                    shelfBookRepository.updateBookStatus(bookIdToUpdate, shelfId, newStatus);
+                    System.out.println("Book status updated successfully.");
+
+                }
+                case 5 -> {
                     return;
                 }
                 default -> System.out.println("Invalid option, please choose something else.");
@@ -503,7 +562,8 @@ public class App {
         System.out.println("1 - View shelf");
         System.out.println("2 - Add book to shelf");
         System.out.println("3 - Delete book from shelf");
-        System.out.println("4 - Go back");
+        System.out.println("4 - Update shelf");
+        System.out.println("5 - Go back");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     }
 }

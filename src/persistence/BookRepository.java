@@ -23,25 +23,26 @@ public class BookRepository implements GenericRepository<Book> {
 
     @Override
     public void add(Book entity) {
-        String sql = """
-                     INSERT INTO book (idBook, title)
-                     VALUES (?, ?)
-                     """;
-
-        try {
-            PreparedStatement stmt = db.connection.prepareStatement(sql);
+        String sql = "INSERT INTO book (idBook, title) VALUES (?, ?)";
+        try (PreparedStatement stmt = db.connection.prepareStatement(sql)) {
             stmt.setInt(1, entity.getIdBook());
             stmt.setString(2, entity.getTitlu());
             stmt.execute();
 
             // Adăugare autorii cărții în tabela asociativă
             for (Author author : entity.getAuthorlist()) {
-                addBookAuthor(entity.getIdBook(), author.getIdAuthor());
+                // Obține detaliile autorului din baza de date folosind ID-ul
+                Author existingAuthor = authorRepository.get(author.getIdAuthor());
+                if (existingAuthor != null) {
+                    addBookAuthor(entity.getIdBook(), existingAuthor.getIdAuthor());
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
+
 
     @Override
     public Book get(int id) {
@@ -197,6 +198,40 @@ public class BookRepository implements GenericRepository<Book> {
         }
 
         return books;
+    }
+
+    public ArrayList<String> getBookTitlesByIds(ArrayList<Integer> bookIds) {
+        ArrayList<String> titles = new ArrayList<>();
+        String sql = "SELECT title FROM book WHERE idBook IN (";
+
+        // Construiește o șir de întrebări pentru fiecare ID de carte
+        StringBuilder placeholders = new StringBuilder();
+        for (int i = 0; i < bookIds.size(); i++) {
+            placeholders.append("?");
+            if (i < bookIds.size() - 1) {
+                placeholders.append(",");
+            }
+        }
+        sql += placeholders + ")";
+
+        try {
+            PreparedStatement stmt = db.connection.prepareStatement(sql);
+
+            // Setează valorile pentru fiecare ID de carte în interogarea SQL
+            for (int i = 0; i < bookIds.size(); i++) {
+                stmt.setInt(i + 1, bookIds.get(i));
+            }
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                titles.add(rs.getString("title"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return titles;
     }
 
 

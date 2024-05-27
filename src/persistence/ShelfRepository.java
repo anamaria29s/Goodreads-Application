@@ -21,12 +21,12 @@ public class ShelfRepository implements GenericRepository<Shelf> {
 
     @Override
     public void add(Shelf entity) {
-        String sql = "INSERT INTO shelf (idShelf, USER_ID) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO shelf (idShelf, USER_ID) VALUES (?, ?)";
 
         try {
             PreparedStatement stmt = db.connection.prepareStatement(sql);
             stmt.setInt(1, entity.getIdShelf());
-            stmt.setInt(3, entity.getUser().getId()); // Presupunând că obținem ID-ul utilizatorului din obiectul Utilizator
+            stmt.setInt(2, entity.getUser().getId()); // Presupunând că obținem ID-ul utilizatorului din obiectul Utilizator
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -78,7 +78,7 @@ public class ShelfRepository implements GenericRepository<Shelf> {
 
     @Override
     public void update(Shelf entity) {
-        String sql = "UPDATE shelf SET status = ? WHERE idShelf = ?";
+        String sql = "UPDATE shelf SET USER_ID = ? WHERE idShelf = ?";
 
         try {
             PreparedStatement stmt = db.connection.prepareStatement(sql);
@@ -102,18 +102,6 @@ public class ShelfRepository implements GenericRepository<Shelf> {
         }
     }
 
-    //    // Add book to a user's shelf
-//    public void addBookToUserShelf(int userId, int bookId) {
-//        // Find the user's shelf
-//        Shelf userShelf = getUserShelf(userId);
-//        if (userShelf == null) {
-//            throw new RuntimeException("User with ID " + userId + " does not have a shelf.");
-//        }
-//
-//        // Add book to the user's shelf
-//        addBookToShelf(userShelf.getIdShelf(), bookId);
-//    }
-//
     private Shelf getUserShelf(int userId) {
         String sql = "SELECT * FROM shelf WHERE USER_ID = ?";
         try {
@@ -131,19 +119,25 @@ public class ShelfRepository implements GenericRepository<Shelf> {
         }
         return null;
     }
+
+    public Shelf getShelfByUserId(int userId) {
+        String sql = "SELECT * FROM shelf WHERE user_id = ?";
+        try {
+            PreparedStatement stmt = db.connection.prepareStatement(sql);
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int shelfId = rs.getInt("idShelf");
+                Utilizator user = utilizatorRepository.get(userId);
+                return new Shelf(shelfId, user);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
 }
-//
-//    public void addBookToShelf(int shelfId, int bookId) {
-//        String sql = "INSERT INTO shelfbook (SHELF_ID, BOOK_ID) VALUES (?, ?)";
-//        try {
-//            PreparedStatement stmt = db.connection.prepareStatement(sql);
-//            stmt.setInt(1, shelfId);
-//            stmt.setInt(2, bookId);
-//            stmt.executeUpdate();
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-//
+
 
 

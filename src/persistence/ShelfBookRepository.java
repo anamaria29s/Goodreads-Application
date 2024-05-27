@@ -1,8 +1,6 @@
 package persistence;
 
-import model.Book;
-import model.Shelf;
-import model.Status;
+import model.*;
 import model.associative.ShelfBook;
 import service.DatabaseConnection;
 
@@ -32,6 +30,31 @@ public class ShelfBookRepository {
         }
     }
 
+    public ShelfBook get(int id) {
+        String sql = "SELECT * FROM shelfbook WHERE BOOK_ID = ?";
+        try {
+            PreparedStatement stmt = db.connection.prepareStatement(sql);
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                String statusValue = rs.getString("STATUS");
+                // Utilizați valoarea direct pentru a crea un obiect Status
+                Status status = new Status(statusValue);
+
+                return new ShelfBook(
+                        rs.getInt("BOOK_ID"),
+                        rs.getInt("SHELF_ID"),
+                        status
+                );
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+
     public ArrayList<ShelfBook> getAll() {
         String sql = "SELECT * FROM shelfbook";
 
@@ -54,62 +77,58 @@ public class ShelfBookRepository {
 
         return shelfBooks;
     }
-//    public ArrayList<Book> getBooksFromUserShelf(int userId) {
-//        ArrayList<Book> books = new ArrayList<>();
-//        String sql = """
-//            SELECT b.idBook, b.title, sb.STATUS
-//            FROM book b
-//            JOIN shelfbook sb ON b.idBook = sb.BOOK_ID
-//            JOIN shelf s ON sb.SHELF_ID = s.idShelf
-//            WHERE s.USER_ID = ?
-//            """;
-//
-//        try {
-//            PreparedStatement stmt = db.connection.prepareStatement(sql);
-//            stmt.setInt(1, userId);
-//            ResultSet rs = stmt.executeQuery();
-//
-//            // Create an instance of BookRepository
-//            BookRepository bookRepository = new BookRepository(db, new AuthorRepository(db));
-//
-//            while (rs.next()) {
-//                // Call getAuthorsForBook on the bookRepository instance
-//                Book book = new Book(
-//                        rs.getInt("idBook"),
-//                        rs.getString("title"),
-//                        bookRepository.getAuthorsForBook(rs.getInt("idBook"))
-//                );
-//                ShelfBook.setStatus(rs.getString("STATUS"));
-//                books.add(book);
-//            }
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        return books;
-//    }
 
-    public void update(ShelfBook shelfBook) {
+    public ArrayList<ShelfBook> getBooksInShelf(int shelfId) {
+        String sql = "SELECT * FROM shelfbook WHERE SHELF_ID = ?";
+        ArrayList<ShelfBook> shelfBooks = new ArrayList<>();
+
+        try {
+            PreparedStatement stmt = db.connection.prepareStatement(sql);
+            stmt.setInt(1, shelfId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                String statusValue = rs.getString("STATUS");
+                // Elimină eticheta suplimentară din valoarea statusului
+                statusValue = statusValue.replace("Status[value=", "").replace("]", "");
+                Status status = Status.fromString(statusValue);
+
+                ShelfBook shelfBook = new ShelfBook(
+                        rs.getInt("BOOK_ID"),
+                        rs.getInt("SHELF_ID"),
+                        status
+                );
+                shelfBooks.add(shelfBook);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return shelfBooks;
+    }
+
+
+    public void updateBookStatus(int bookId, int shelfId, Status newStatus) {
         String sql = "UPDATE shelfbook SET STATUS = ? WHERE BOOK_ID = ? AND SHELF_ID = ?";
 
         try {
             PreparedStatement stmt = db.connection.prepareStatement(sql);
-            stmt.setString(1, shelfBook.getStatus().toString());
-            stmt.setInt(2, shelfBook.getIdBook());
-            stmt.setInt(3, shelfBook.getIdShelf());
+            stmt.setString(1, newStatus.value());
+            stmt.setInt(2, bookId);
+            stmt.setInt(3, shelfId);
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
+
     public void delete(ShelfBook shelfBook) {
-        String sql = "DELETE FROM shelfbook WHERE BOOK_ID = ? AND SHELF_ID = ?";
+        String sql = "DELETE FROM shelfbook WHERE BOOK_ID = ? ";
 
         try {
             PreparedStatement stmt = db.connection.prepareStatement(sql);
             stmt.setInt(1, shelfBook.getIdBook());
-            stmt.setInt(2, shelfBook.getIdShelf());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);

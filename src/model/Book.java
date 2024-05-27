@@ -55,7 +55,7 @@ public class Book {
         authorlist = new ArrayList<>();
         for (int i = 0; i < numAuthors; i++) {
             Author author = new Author();
-            author.read();
+            author.read2();
             authorlist.add(author);
         }
     }
