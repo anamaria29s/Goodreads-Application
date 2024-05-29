@@ -95,6 +95,7 @@ public class AuthorRepository implements GenericRepository<Author> {
                  FROM author a
                  JOIN bookauthor ba ON a.idAuthor = ba.AUTHOR_ID
                  WHERE ba.BOOK_ID = ?
+                 ORDER BY a.nume asc 
                  """;
 
         ArrayList<Author> authors = new ArrayList<>();

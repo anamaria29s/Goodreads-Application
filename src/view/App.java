@@ -5,6 +5,7 @@ import model.associative.AuthorRating;
 import model.associative.BookRating;
 import model.associative.ShelfBook;
 import persistence.*;
+import service.Audit;
 import service.DatabaseConnection;
 
 import java.util.ArrayList;
@@ -124,19 +125,22 @@ public class App {
 
             switch (choice) {
                 case 1 -> {
+                    Audit audit = Audit.getInstance();
+                    //Audit.setConnection(dbConnection);
+                    audit.afisare();
                     // Read utilizator
-                    System.out.print("Enter the ID of the user: ");
-                    int userId = scanner.nextInt();
-                    scanner.nextLine();
-                    Utilizator user = utilizatorRepository.get(userId);
-                    if (user != null) {
-                        System.out.println("User found:");
-                        System.out.println("ID: " + user.getId());
-                        System.out.println("Username: " + user.getUsername());
-                        System.out.println("Mail: " + user.getMail());
-                    } else {
-                        System.out.println("User not found with ID: " + userId);
-                    }
+//                    System.out.print("Enter the ID of the user: ");
+//                    int userId = scanner.nextInt();
+//                    scanner.nextLine();
+//                    Utilizator user = utilizatorRepository.get(userId);
+//                    if (user != null) {
+//                        System.out.println("User found:");
+//                        System.out.println("ID: " + user.getId());
+//                        System.out.println("Username: " + user.getUsername());
+//                        System.out.println("Mail: " + user.getMail());
+//                    } else {
+//                        System.out.println("User not found with ID: " + userId);
+//                    }
                 }
                 case 2 -> {
                     // Read author

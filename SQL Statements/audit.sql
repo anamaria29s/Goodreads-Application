@@ -23,17 +23,9 @@ select object_schema,
        action_name,
        event_timestamp
 from UNIFIED_AUDIT_TRAIL
-where current_user = 'java' and UNIFIED_AUDIT_POLICIES = 'AUDIT_OPERATIONS';
+where current_user = 'java' and lower(UNIFIED_AUDIT_POLICIES) = 'audit_operations';
 
+commit;
 
-
-
-
--- PL/SQL STATEMENT TO PURGE UNIFIED_AUDIT_TRAIL
--- BEGIN
---     DBMS_AUDIT_MGMT.CLEAN_AUDIT_TRAIL(
---             AUDIT_TRAIL_TYPE => DBMS_AUDIT_MGMT.AUDIT_TRAIL_UNIFIED,
---             USE_LAST_ARCH_TIMESTAMP => FALSE,
---             CONTAINER => dbms_audit_mgmt.container_current);
--- END;
--- /
+select * from AUTHOR;
+select * from AUDIT_UNIFIED_POLICIES where lower(POLICY_NAME)= 'audit_operations';
