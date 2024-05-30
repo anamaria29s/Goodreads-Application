@@ -29,3 +29,4 @@ commit;
 
 select * from AUTHOR;
 select * from AUDIT_UNIFIED_POLICIES where lower(POLICY_NAME)= 'audit_operations';
+

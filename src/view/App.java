@@ -125,22 +125,19 @@ public class App {
 
             switch (choice) {
                 case 1 -> {
-                    Audit audit = Audit.getInstance();
-                    //Audit.setConnection(dbConnection);
-                    audit.afisare();
                     // Read utilizator
-//                    System.out.print("Enter the ID of the user: ");
-//                    int userId = scanner.nextInt();
-//                    scanner.nextLine();
-//                    Utilizator user = utilizatorRepository.get(userId);
-//                    if (user != null) {
-//                        System.out.println("User found:");
-//                        System.out.println("ID: " + user.getId());
-//                        System.out.println("Username: " + user.getUsername());
-//                        System.out.println("Mail: " + user.getMail());
-//                    } else {
-//                        System.out.println("User not found with ID: " + userId);
-//                    }
+                    System.out.print("Enter the ID of the user: ");
+                    int userId = scanner.nextInt();
+                    scanner.nextLine();
+                    Utilizator user = utilizatorRepository.get(userId);
+                    if (user != null) {
+                        System.out.println("User found:");
+                        System.out.println("ID: " + user.getId());
+                        System.out.println("Username: " + user.getUsername());
+                        System.out.println("Mail: " + user.getMail());
+                    } else {
+                        System.out.println("User not found with ID: " + userId);
+                    }
                 }
                 case 2 -> {
                     // Read author
@@ -310,8 +307,10 @@ public class App {
                     scanner.nextLine();
                     Utilizator user = utilizatorRepository.get(userId);
                     if (user != null) {
+                        shelfRepository.deleteByUserId(userId);
+                        ratingRepository.deleteByUserId(userId);
                         utilizatorRepository.delete(user);
-                        System.out.println("User deleted successfully.");
+                        System.out.println("User deleted successfully along with all related data.");
                     } else {
                         System.out.println("User not found with ID: " + userId);
                     }
@@ -323,6 +322,8 @@ public class App {
                     scanner.nextLine();
                     Author author = authorRepository.get(authorId);
                     if (author != null) {
+                        //bookRepository.deleteByAuthorId(authorId);
+                        authorRatingRepository.deleteByAuthorId(authorId);
                         authorRepository.delete(author);
                         System.out.println("Author deleted successfully.");
                     } else {
@@ -336,6 +337,8 @@ public class App {
                     scanner.nextLine();
                     Book book = bookRepository.get(bookId);
                     if (book != null) {
+                        shelfBookRepository.deleteByBookId(bookId);
+                        bookRatingRepository.deleteByBookId(bookId);
                         bookRepository.delete(book);
                         System.out.println("Book deleted successfully.");
                     } else {
@@ -349,6 +352,8 @@ public class App {
                     scanner.nextLine();
                     Rating rating = ratingRepository.get(ratingId);
                     if (rating != null) {
+                        authorRatingRepository.deleteByRatingId(ratingId);
+                        bookRatingRepository.deleteByRatingId(ratingId);
                         ratingRepository.delete(rating);
                         System.out.println("Rating deleted successfully.");
                     } else {

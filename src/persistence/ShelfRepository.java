@@ -137,6 +137,17 @@ public class ShelfRepository implements GenericRepository<Shelf> {
         }
         return null;
     }
+
+    public void deleteByUserId(int userId) {
+        try {
+            String query = "DELETE FROM SHELF WHERE user_id = ?";
+            PreparedStatement stmt = db.connection.prepareStatement(query);
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
 
 

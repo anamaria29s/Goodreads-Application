@@ -98,7 +98,6 @@ public class AuthorRatingRepository implements GenericRepository<Rating> {
     }
 
 
-
     @Override
     public void update(Rating entity) {
         String sql = "UPDATE Rating SET nota = ?, review = ? WHERE idRating = ?";
@@ -123,6 +122,29 @@ public class AuthorRatingRepository implements GenericRepository<Rating> {
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteByRatingId(int ratingId) {
+        try {
+            String query = "DELETE FROM AUTHORRATING WHERE rating_id = ?";
+            PreparedStatement stmt = db.connection.prepareStatement(query);
+            stmt.setInt(1, ratingId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void deleteByAuthorId(int authorId) {
+        try {
+            String query = "DELETE FROM AUTHORRATING WHERE author_id = ?";
+            PreparedStatement stmt = db.connection.prepareStatement(query);
+            stmt.setInt(1, authorId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

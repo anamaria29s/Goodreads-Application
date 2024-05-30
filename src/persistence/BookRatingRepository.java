@@ -106,6 +106,26 @@ public class BookRatingRepository implements GenericRepository<Rating> {
         }
     }
 
+    public void deleteByRatingId(int ratingId) {
+        try {
+            String query = "DELETE FROM BOOKRATING WHERE rating_id = ?";
+            PreparedStatement stmt = db.connection.prepareStatement(query);
+            stmt.setInt(1, ratingId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public void deleteByBookId(int bookId) {
+        try {
+            String query = "DELETE FROM BOOKRATING WHERE book_id = ?";
+            PreparedStatement stmt = db.connection.prepareStatement(query);
+            stmt.setInt(1, bookId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     public ArrayList<Rating> getAllRatingsForBook(int bookId) {
         String sql = "SELECT * FROM BookRating WHERE book_id = ?";
         ArrayList<Rating> bookRatings = new ArrayList<>();

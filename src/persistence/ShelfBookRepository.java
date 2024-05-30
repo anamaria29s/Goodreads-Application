@@ -134,4 +134,15 @@ public class ShelfBookRepository {
             throw new RuntimeException(e);
         }
     }
+
+    public void deleteByBookId(int bookId) {
+        try {
+            String query = "DELETE FROM SHELFBOOK WHERE book_id = ?";
+            PreparedStatement stmt = db.connection.prepareStatement(query);
+            stmt.setInt(1, bookId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

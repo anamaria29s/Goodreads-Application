@@ -1,11 +1,14 @@
 package persistence;
 
+import model.AuditEntity;
 import model.Utilizator;
+import service.Audit;
 import service.DatabaseConnection;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 
@@ -30,6 +33,15 @@ public class UtilizatorRepository implements GenericRepository<Utilizator> {
             stmt.setString(3, entity.getMail());
             stmt.setString(4, entity.getPassword());
             stmt.executeUpdate();
+
+            // Log audit action
+            AuditEntity auditEntity = new AuditEntity();
+            auditEntity.setSchema("JAVA");
+            auditEntity.setTable("UTILIZATOR");
+            auditEntity.setActionName("INSERT");
+            auditEntity.setTimestamp(LocalDateTime.now());
+            Audit.getInstance().log(auditEntity);
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -106,6 +118,15 @@ public class UtilizatorRepository implements GenericRepository<Utilizator> {
             stmt.setString(3, entity.getPassword());
             stmt.setInt(4, entity.getId());
             stmt.executeUpdate();
+
+            // Log audit action
+            AuditEntity auditEntity = new AuditEntity();
+            auditEntity.setSchema("JAVA");
+            auditEntity.setTable("UTILIZATOR");
+            auditEntity.setActionName("UPDATE");
+            auditEntity.setTimestamp(LocalDateTime.now());
+            Audit.getInstance().log(auditEntity);
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -122,6 +143,15 @@ public class UtilizatorRepository implements GenericRepository<Utilizator> {
             PreparedStatement stmt = db.connection.prepareStatement(sql);
             stmt.setInt(1, entity.getId());
             stmt.executeUpdate();
+
+            // Log audit action
+            AuditEntity auditEntity = new AuditEntity();
+            auditEntity.setSchema("JAVA");
+            auditEntity.setTable("UTILIZATOR");
+            auditEntity.setActionName("DELETE");
+            auditEntity.setTimestamp(LocalDateTime.now());
+            Audit.getInstance().log(auditEntity);
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -147,4 +177,19 @@ public class UtilizatorRepository implements GenericRepository<Utilizator> {
         return null;
     }
 
+    public void deleteByUserId(int userId) {
+        try {
+            String query = "DELETE FROM SHELF WHERE user_id = ?";
+            PreparedStatement stmt = db.connection.prepareStatement(query);
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+
+            query = "DELETE FROM RATING WHERE user_id = ?";
+            stmt = db.connection.prepareStatement(query);
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

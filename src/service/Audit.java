@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import static service.DatabaseConnection.connection;
@@ -17,17 +19,21 @@ public class Audit {
     private static FileWriter writer;
     private static String path;
 
+    private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
     private Audit(){
         try{
             path = "audit.csv";
-            writer  = new FileWriter(path);
-            writer.append("USER, TABLE, ACTION, TIMESTAMP\n");
-            writer.flush();
+            writer  = new FileWriter(path,true);
+            if (new java.io.File(path).length() == 0) {
+                writer.append("USER, TABLE, ACTION, TIMESTAMP\n");
+                writer.flush();
+            }
+
         }catch (Exception e){
             System.out.println("Couldn`t open file for audit");
         }
     }
-
 
     public static Audit getInstance() {
         if (instance == null) {
@@ -44,7 +50,7 @@ public class Audit {
             writer.append(", ");
             writer.append(audit.getActionName());
             writer.append(", ");
-            writer.append(audit.getTimestamp());
+            writer.append(audit.getTimestamp().format(TIMESTAMP_FORMATTER)); // formatarea timestamp-ului ca String
             writer.append("\n");
 
             writer.flush();
@@ -83,6 +89,10 @@ public class Audit {
                 String table = rs.getString("object_name");
                 String action = rs.getString("action_name");
                 String timestamp = rs.getString("event_timestamp");
+
+                // Parse and format the timestamp
+                LocalDateTime parsedTimestamp = LocalDateTime.parse(timestamp, TIMESTAMP_FORMATTER);
+                String formattedTimestamp = parsedTimestamp.format(TIMESTAMP_FORMATTER);
 
                 System.out.printf("%s | %s | %s | %s%n", schema, table, action, timestamp);
             }

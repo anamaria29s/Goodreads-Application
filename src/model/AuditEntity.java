@@ -17,6 +17,8 @@ public class AuditEntity {
         this.timestamp = timestamp;
     }
 
+    public AuditEntity() {}
+
     public String getSchema() {
         return schema;
     }
@@ -29,8 +31,17 @@ public class AuditEntity {
         return actionName;
     }
 
-    public String getTimestamp() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return timestamp.format(formatter);
+    public LocalDateTime getTimestamp() {
+        return timestamp;
     }
+
+    public void setSchema(String schema) {this.schema = schema;}
+
+    public void setTable(String table) {this.table = table;}
+
+
+    public void setActionName(String actionName) { this.actionName = actionName;}
+
+    public void setTimestamp(LocalDateTime timestamp){this.timestamp = timestamp;}
+
 }

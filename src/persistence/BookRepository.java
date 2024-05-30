@@ -1,13 +1,16 @@
 package persistence;
 
+import model.AuditEntity;
 import model.Author;
 import model.Book;
 import model.associative.BookAuthor;
+import service.Audit;
 import service.DatabaseConnection;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -37,6 +40,15 @@ public class BookRepository implements GenericRepository<Book> {
                     addBookAuthor(entity.getIdBook(), existingAuthor.getIdAuthor());
                 }
             }
+
+            // Log audit action
+            AuditEntity auditEntity = new AuditEntity();
+            auditEntity.setSchema("JAVA");
+            auditEntity.setTable("BOOK");
+            auditEntity.setActionName("INSERT");
+            auditEntity.setTimestamp(LocalDateTime.now());
+            Audit.getInstance().log(auditEntity);
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -110,6 +122,15 @@ public class BookRepository implements GenericRepository<Book> {
             stmt.setString(1, entity.getTitlu());
             stmt.setInt(2, entity.getIdBook());
             stmt.executeUpdate();
+
+            // Log audit action
+            AuditEntity auditEntity = new AuditEntity();
+            auditEntity.setSchema("JAVA");
+            auditEntity.setTable("BOOK");
+            auditEntity.setActionName("UPDATE");
+            auditEntity.setTimestamp(LocalDateTime.now());
+            Audit.getInstance().log(auditEntity);
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -121,6 +142,15 @@ public class BookRepository implements GenericRepository<Book> {
         try (PreparedStatement stmt = db.connection.prepareStatement(sql)) {
             stmt.setInt(1, book.getIdBook());
             stmt.executeUpdate();
+
+            // Log audit action
+            AuditEntity auditEntity = new AuditEntity();
+            auditEntity.setSchema("JAVA");
+            auditEntity.setTable("BOOK");
+            auditEntity.setActionName("DELETE");
+            auditEntity.setTimestamp(LocalDateTime.now());
+            Audit.getInstance().log(auditEntity);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -235,6 +265,22 @@ public class BookRepository implements GenericRepository<Book> {
     }
 
 
+
+    public void deleteByAuthorId(int authorId) {
+        try {
+            String query = "DELETE FROM BOOKAUTHOR WHERE author_id = ?";
+            PreparedStatement stmt = db.connection.prepareStatement(query);
+            stmt.setInt(1, authorId);
+            stmt.executeUpdate();
+
+            query = "DELETE FROM AUTHORRATING WHERE author_id = ?";
+            stmt = db.connection.prepareStatement(query);
+            stmt.setInt(1, authorId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
 
 
