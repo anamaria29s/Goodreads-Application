@@ -79,7 +79,11 @@ public class ShelfBookRepository {
     }
 
     public ArrayList<ShelfBook> getBooksInShelf(int shelfId) {
-        String sql = "SELECT * FROM shelfbook WHERE SHELF_ID = ?";
+        String sql = "SELECT sb.*, b.TITLE " +
+                "FROM shelfbook sb " +
+                "JOIN book b ON sb.BOOK_ID = b.IDBOOK " +
+                "WHERE sb.SHELF_ID = ? " +
+                "ORDER BY b.TITLE ASC";
         ArrayList<ShelfBook> shelfBooks = new ArrayList<>();
 
         try {

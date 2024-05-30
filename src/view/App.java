@@ -652,9 +652,7 @@ public class App {
         System.out.println("2 - Add book to shelf");
         System.out.println("3 - Delete book from shelf");
         System.out.println("4 - Update shelf");
-        System.out.println("5 - Leave a rating for an author");
-        System.out.println("6 - Leave a rating for a book");
-        System.out.println("7 - Go back");
+        System.out.println("5 - Go back");
         System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     }
 
