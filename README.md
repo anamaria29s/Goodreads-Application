@@ -4,7 +4,7 @@ Aceasta este o aplicație Goodreads simplă scrisă în Java, care utilizează c
 ## Descriere
 Această aplicație vă permite să gestionați o listă de cărți, inclusiv adăugarea, ștergerea, actualizarea și afișarea detaliilor acestora, precum și a autorilor. Puteți să adăugați recenzii pentru cărți și să le vizualizați. În plus, aplicația include și funcționalitatea de logare pentru utilizator, precum și gestionarea stării cărților în "shelf-uri".
 - Logare utilizator: Utilizatorii pot să se autentifice în aplicație pentru a accesa și gestiona lista lor personală de cărți și recenzii.
-- Adăugare de cărți: Adăugați cărți noi la lista dvs. cu detalii precum nume, autor, gen și rating.
+- Adăugare de cărți: Adăugați cărți noi la lista dvs. cu detalii precum nume, autor și rating.
 - Ștergere de cărți: Ștergeți cărți din lista dvs. pe baza numărului lor de identificare.
 - Actualizare de cărți: Actualizați informațiile despre cărți existente, cum ar fi rating-ul.
 - Adăugare de recenzii: Scrieți și adăugați recenzii pentru cărți.
