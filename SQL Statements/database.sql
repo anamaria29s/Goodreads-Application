@@ -103,8 +103,14 @@ INSERT INTO BOOKRATING (book_id, rating_id) VALUES (1004, 95);
 INSERT INTO BOOKRATING (book_id, rating_id) VALUES (1006, 94);
 
 
-INSERT INTO SHELF (idShelf, user_id) VALUES (90, 10);
-INSERT INTO SHELF (idShelf, user_id) VALUES (91, 11);
-INSERT INTO SHELF (idShelf, user_id) VALUES (92, 12);
-INSERT INTO SHELF (idShelf, user_id) VALUES (94, 14);
-INSERT INTO SHELF (idShelf, user_id) VALUES (95, 15);
+INSERT INTO SHELF (idShelf, user_id) VALUES (50, 10);
+INSERT INTO SHELF (idShelf, user_id) VALUES (51, 11);
+INSERT INTO SHELF (idShelf, user_id) VALUES (52, 12);
+INSERT INTO SHELF (idShelf, user_id) VALUES (54, 14);
+INSERT INTO SHELF (idShelf, user_id) VALUES (55, 15);
+
+DELETE FROM SHELF WHERE idShelf = 90;
+DELETE FROM SHELF WHERE idShelf = 91;
+DELETE FROM SHELF WHERE idShelf = 92;
+DELETE FROM SHELF WHERE idShelf = 94;
+DELETE FROM SHELF WHERE idShelf = 95;

@@ -307,8 +307,6 @@ public class App {
                     scanner.nextLine();
                     Utilizator user = utilizatorRepository.get(userId);
                     if (user != null) {
-                        shelfRepository.deleteByUserId(userId);
-                        ratingRepository.deleteByUserId(userId);
                         utilizatorRepository.delete(user);
                         System.out.println("User deleted successfully along with all related data.");
                     } else {
@@ -322,8 +320,6 @@ public class App {
                     scanner.nextLine();
                     Author author = authorRepository.get(authorId);
                     if (author != null) {
-                        //bookRepository.deleteByAuthorId(authorId);
-                        authorRatingRepository.deleteByAuthorId(authorId);
                         authorRepository.delete(author);
                         System.out.println("Author deleted successfully.");
                     } else {
@@ -337,8 +333,6 @@ public class App {
                     scanner.nextLine();
                     Book book = bookRepository.get(bookId);
                     if (book != null) {
-                        shelfBookRepository.deleteByBookId(bookId);
-                        bookRatingRepository.deleteByBookId(bookId);
                         bookRepository.delete(book);
                         System.out.println("Book deleted successfully.");
                     } else {
@@ -352,8 +346,6 @@ public class App {
                     scanner.nextLine();
                     Rating rating = ratingRepository.get(ratingId);
                     if (rating != null) {
-                        authorRatingRepository.deleteByRatingId(ratingId);
-                        bookRatingRepository.deleteByRatingId(ratingId);
                         ratingRepository.delete(rating);
                         System.out.println("Rating deleted successfully.");
                     } else {

@@ -131,18 +131,53 @@ public class UtilizatorRepository implements GenericRepository<Utilizator> {
             throw new RuntimeException(e);
         }
     }
-
     @Override
     public void delete(Utilizator entity) {
-        String sql = """
-                     DELETE FROM utilizator
-                     WHERE user_id = ?
-                     """;
+        String sqlDeleteUtilizator = """
+                                 DELETE FROM utilizator
+                                 WHERE user_id = ?
+                                 """;
 
         try {
-            PreparedStatement stmt = db.connection.prepareStatement(sql);
-            stmt.setInt(1, entity.getId());
-            stmt.executeUpdate();
+            db.connection.setAutoCommit(false);
+
+            String sqlDeleteAuthorRatings = "DELETE FROM AUTHORRATING WHERE RATING_ID IN (SELECT RATING_ID FROM RATING WHERE user_id = ?)";
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteAuthorRatings)) {
+                stmt.setInt(1, entity.getId());
+                stmt.executeUpdate();
+            }
+
+            String sqlDeleteBookRatings = "DELETE FROM BOOKRATING WHERE rating_id IN (SELECT RATING_ID FROM RATING WHERE user_id = ?)";
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteBookRatings)) {
+                stmt.setInt(1, entity.getId());
+                stmt.executeUpdate();
+            }
+
+            // Delete related ratings
+            String sqlDeleteRatings = """
+                                  DELETE FROM RATING
+                                  WHERE user_id = ?
+                                  """;
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteRatings)) {
+                stmt.setInt(1, entity.getId());
+                stmt.executeUpdate();
+            }
+
+            // Delete related shelves
+            String sqlDeleteShelves = """
+                                  DELETE FROM SHELF
+                                  WHERE user_id = ?
+                                  """;
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteShelves)) {
+                stmt.setInt(1, entity.getId());
+                stmt.executeUpdate();
+            }
+
+            // Delete the user
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteUtilizator)) {
+                stmt.setInt(1, entity.getId());
+                stmt.executeUpdate();
+            }
 
             // Log audit action
             AuditEntity auditEntity = new AuditEntity();
@@ -152,10 +187,23 @@ public class UtilizatorRepository implements GenericRepository<Utilizator> {
             auditEntity.setTimestamp(LocalDateTime.now());
             Audit.getInstance().log(auditEntity);
 
+            db.connection.commit();
         } catch (SQLException e) {
+            try {
+               db. connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
             throw new RuntimeException(e);
+        } finally {
+            try {
+                db.connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
+
     public Utilizator getByUsername(String username) {
         String sql = "SELECT * FROM utilizator WHERE username = ?";
         try {
@@ -177,19 +225,4 @@ public class UtilizatorRepository implements GenericRepository<Utilizator> {
         return null;
     }
 
-    public void deleteByUserId(int userId) {
-        try {
-            String query = "DELETE FROM SHELF WHERE user_id = ?";
-            PreparedStatement stmt = db.connection.prepareStatement(query);
-            stmt.setInt(1, userId);
-            stmt.executeUpdate();
-
-            query = "DELETE FROM RATING WHERE user_id = ?";
-            stmt = db.connection.prepareStatement(query);
-            stmt.setInt(1, userId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }

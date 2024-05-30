@@ -91,34 +91,43 @@ public class ShelfRepository implements GenericRepository<Shelf> {
 
     @Override
     public void delete(Shelf entity) {
-        String sql = "DELETE FROM shelf WHERE idShelf = ?";
+        String sqlDeleteShelf = "DELETE FROM SHELF WHERE idShelf = ?";
 
         try {
-            PreparedStatement stmt = db.connection.prepareStatement(sql);
-            stmt.setInt(1, entity.getIdShelf());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+            db.connection.setAutoCommit(false);
 
-    private Shelf getUserShelf(int userId) {
-        String sql = "SELECT * FROM shelf WHERE USER_ID = ?";
-        try {
-            PreparedStatement stmt = db.connection.prepareStatement(sql);
-            stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                int shelfId = rs.getInt("idShelf");
-                Utilizator user = utilizatorRepository.get(userId);
-                return new Shelf(shelfId, user);
+            // Delete related shelf books
+            String sqlDeleteShelfBooks = "DELETE FROM SHELFBOOK WHERE shelf_id = ?";
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteShelfBooks)) {
+                stmt.setInt(1, entity.getIdShelf());
+                stmt.executeUpdate();
             }
+
+            // Delete the shelf
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteShelf)) {
+                stmt.setInt(1, entity.getIdShelf());
+                stmt.executeUpdate();
+            }
+
+            db.connection.commit();
         } catch (SQLException e) {
+            try {
+                db.connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
             throw new RuntimeException(e);
+        } finally {
+            try {
+                db.connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-        return null;
     }
+
+
+
 
     public Shelf getShelfByUserId(int userId) {
         String sql = "SELECT * FROM shelf WHERE user_id = ?";
@@ -138,16 +147,7 @@ public class ShelfRepository implements GenericRepository<Shelf> {
         return null;
     }
 
-    public void deleteByUserId(int userId) {
-        try {
-            String query = "DELETE FROM SHELF WHERE user_id = ?";
-            PreparedStatement stmt = db.connection.prepareStatement(query);
-            stmt.setInt(1, userId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+
 }
 
 

@@ -101,10 +101,35 @@ public class AuthorRepository implements GenericRepository<Author> {
 
     @Override
     public void delete(Author author) {
-        String sql = "DELETE FROM AUTHOR WHERE idAuthor = ?";
-        try (PreparedStatement stmt = db.connection.prepareStatement(sql)) {
-            stmt.setInt(1, author.getIdAuthor());
-            stmt.executeUpdate();
+        String sqlDeleteAuthor = "DELETE FROM AUTHOR WHERE idAuthor = ?";
+
+        try {
+            db.connection.setAutoCommit(false);
+
+            // Delete related book authors
+            String sqlDeleteBookAuthors = "DELETE FROM BOOKAUTHOR WHERE author_id = ?";
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteBookAuthors)) {
+                stmt.setInt(1, author.getIdAuthor());
+                stmt.executeUpdate();
+            }
+
+            // Delete related author ratings
+            String sqlDeleteAuthorRatings = "DELETE FROM AUTHORRATING WHERE author_id = ?";
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteAuthorRatings)) {
+                stmt.setInt(1, author.getIdAuthor());
+                stmt.executeUpdate();
+            }
+
+            String sqlDeleteRatings = "DELETE FROM RATING WHERE IDRATING IN (SELECT RATING_ID FROM JAVA.AUTHORRATING WHERE AUTHOR_ID = ?)";
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteRatings)) {
+                stmt.setInt(1, author.getIdAuthor());
+                stmt.executeUpdate();
+            }
+            // Delete the author
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteAuthor)) {
+                stmt.setInt(1, author.getIdAuthor());
+                stmt.executeUpdate();
+            }
 
             // Log audit action
             AuditEntity auditEntity = new AuditEntity();
@@ -114,10 +139,23 @@ public class AuthorRepository implements GenericRepository<Author> {
             auditEntity.setTimestamp(LocalDateTime.now());
             Audit.getInstance().log(auditEntity);
 
+            db.connection.commit();
         } catch (SQLException e) {
+            try {
+                db.connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
             e.printStackTrace();
+        } finally {
+            try {
+                db.connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
+
 
     public ArrayList<Author> getAuthorsForBook(int book_id) {
         String sql = """
@@ -147,20 +185,6 @@ public class AuthorRepository implements GenericRepository<Author> {
         }
         return authors;
     }
-    public void deleteByAuthorId(int authorId) {
-        try {
-            String query = "DELETE FROM BOOKAUTHOR WHERE author_id = ?";
-            PreparedStatement stmt = db.connection.prepareStatement(query);
-            stmt.setInt(1, authorId);
-            stmt.executeUpdate();
 
-            query = "DELETE FROM AUTHORRATING WHERE author_id = ?";
-            stmt = db.connection.prepareStatement(query);
-            stmt.setInt(1, authorId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
 }

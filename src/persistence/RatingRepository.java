@@ -125,40 +125,48 @@ public class RatingRepository implements GenericRepository<Rating> {
 
     @Override
     public void delete(Rating entity) {
-        String sql = "DELETE FROM rating WHERE idRating = ?";
+        String sqlDeleteRating = "DELETE FROM RATING WHERE idRating = ?";
 
         try {
-            PreparedStatement stmt = db.connection.prepareStatement(sql);
-            stmt.setInt(1, entity.getIdRating());
-            stmt.executeUpdate();
+            db.connection.setAutoCommit(false);
+
+            // Delete related author ratings
+            String sqlDeleteAuthorRatings = "DELETE FROM AUTHORRATING WHERE rating_id = ?";
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteAuthorRatings)) {
+                stmt.setInt(1, entity.getIdRating());
+                stmt.executeUpdate();
+            }
+
+            // Delete related book ratings
+            String sqlDeleteBookRatings = "DELETE FROM BOOKRATING WHERE rating_id = ?";
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteBookRatings)) {
+                stmt.setInt(1, entity.getIdRating());
+                stmt.executeUpdate();
+            }
+
+            // Delete the rating
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteRating)) {
+                stmt.setInt(1, entity.getIdRating());
+                stmt.executeUpdate();
+            }
+
+            db.connection.commit();
         } catch (SQLException e) {
+            try {
+                db.connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
             throw new RuntimeException(e);
+        } finally {
+            try {
+                db.connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public void deleteByRatingId(int ratingId) {
-        try {
-            String query = "DELETE FROM AUTHORRATING WHERE rating_id = ?";
-            PreparedStatement stmt = db.connection.prepareStatement(query);
-            stmt.setInt(1, ratingId);
-            stmt.executeUpdate();
 
-            query = "DELETE FROM BOOKRATING WHERE rating_id = ?";
-            stmt = db.connection.prepareStatement(query);
-            stmt.setInt(1, ratingId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    public void deleteByUserId(int userId) {
-        try {
-            String query = "DELETE FROM RATING WHERE user_id = ?";
-            PreparedStatement stmt = db.connection.prepareStatement(query);
-            stmt.setInt(1, userId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+
 }

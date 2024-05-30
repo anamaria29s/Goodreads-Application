@@ -125,26 +125,5 @@ public class AuthorRatingRepository implements GenericRepository<Rating> {
         }
     }
 
-    public void deleteByRatingId(int ratingId) {
-        try {
-            String query = "DELETE FROM AUTHORRATING WHERE rating_id = ?";
-            PreparedStatement stmt = db.connection.prepareStatement(query);
-            stmt.setInt(1, ratingId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
-    }
-
-    public void deleteByAuthorId(int authorId) {
-        try {
-            String query = "DELETE FROM AUTHORRATING WHERE author_id = ?";
-            PreparedStatement stmt = db.connection.prepareStatement(query);
-            stmt.setInt(1, authorId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }

@@ -136,12 +136,46 @@ public class BookRepository implements GenericRepository<Book> {
         }
     }
 
+
     @Override
     public void delete(Book book) {
-        String sql = "DELETE FROM BOOK WHERE idBook = ?";
-        try (PreparedStatement stmt = db.connection.prepareStatement(sql)) {
-            stmt.setInt(1, book.getIdBook());
-            stmt.executeUpdate();
+        String sqlDeleteBook = "DELETE FROM BOOK WHERE idBook = ?";
+
+        try {
+            db.connection.setAutoCommit(false);
+
+            // Delete related book authors
+            String sqlDeleteBookAuthors = "DELETE FROM BOOKAUTHOR WHERE book_id = ?";
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteBookAuthors)) {
+                stmt.setInt(1, book.getIdBook());
+                stmt.executeUpdate();
+            }
+
+            // Delete related shelf books
+            String sqlDeleteShelfBooks = "DELETE FROM SHELFBOOK WHERE book_id = ?";
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteShelfBooks)) {
+                stmt.setInt(1, book.getIdBook());
+                stmt.executeUpdate();
+            }
+
+            // Delete related book ratings
+            String sqlDeleteBookRatings = "DELETE FROM BOOKRATING WHERE book_id = ?";
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteBookRatings)) {
+                stmt.setInt(1, book.getIdBook());
+                stmt.executeUpdate();
+            }
+
+            String sqlDeleteRatings = "DELETE FROM RATING WHERE IDRATING IN (SELECT RATING_ID FROM BOOKRATING WHERE book_id = ?)";
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteRatings)) {
+                stmt.setInt(1, book.getIdBook());
+                stmt.executeUpdate();
+            }
+
+            // Delete the book
+            try (PreparedStatement stmt = db.connection.prepareStatement(sqlDeleteBook)) {
+                stmt.setInt(1, book.getIdBook());
+                stmt.executeUpdate();
+            }
 
             // Log audit action
             AuditEntity auditEntity = new AuditEntity();
@@ -151,10 +185,23 @@ public class BookRepository implements GenericRepository<Book> {
             auditEntity.setTimestamp(LocalDateTime.now());
             Audit.getInstance().log(auditEntity);
 
+            db.connection.commit();
         } catch (SQLException e) {
+            try {
+                db.connection.rollback();
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
             e.printStackTrace();
+        } finally {
+            try {
+                db.connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
+
 
     // Metodă pentru adăugarea unui autor în tabela asociativă Book_Author
     private void addBookAuthor(int idBook, int idAuthor) {
@@ -266,21 +313,6 @@ public class BookRepository implements GenericRepository<Book> {
 
 
 
-    public void deleteByAuthorId(int authorId) {
-        try {
-            String query = "DELETE FROM BOOKAUTHOR WHERE author_id = ?";
-            PreparedStatement stmt = db.connection.prepareStatement(query);
-            stmt.setInt(1, authorId);
-            stmt.executeUpdate();
-
-            query = "DELETE FROM AUTHORRATING WHERE author_id = ?";
-            stmt = db.connection.prepareStatement(query);
-            stmt.setInt(1, authorId);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }
 
 
